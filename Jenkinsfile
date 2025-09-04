@@ -2,13 +2,15 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.9.11'   // must match Jenkins Global Tool Configuration
+        maven 'Maven-3.9.11'   // Jenkins Maven installation name
     }
 
     environment {
-        IMAGE_NAME = "expleodockerkk/java-app"
-        IMAGE_TAG  = "1.0.0"
-        DOCKER_CREDENTIALS = credentials('Docker-Hub')
+        AWS_REGION   = "ap-south-1"                     // your AWS region
+        ACCOUNT_ID   = "325910234813"              // replace with your AWS account ID
+        ECR_REGISTRY = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        ECR_REPO     = "${ECR_REGISTRY}/java-app"
+        IMAGE_TAG    = "1.0.0"
     }
 
     stages {
@@ -32,22 +34,17 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+                sh 'docker tag $ECR_REPO:$IMAGE_TAG $ECR_REPO:latest'
             }
         }
 
-        stage('Tag Docker Image') {
+        stage('Push to ECR') {
             steps {
-                sh 'docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest'
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'Docker-Hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
-                    sh 'docker push $IMAGE_NAME:latest'
+                withAWS(credentials: 'AWS-Cred', region: "${AWS_REGION}") {
+                    sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
+                    sh 'docker push $ECR_REPO:$IMAGE_TAG'
+                    sh 'docker push $ECR_REPO:latest'
                 }
             }
         }
