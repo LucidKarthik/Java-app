@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        AWS_REGION   = "us-east-1"                // your AWS region
+        AWS_REGION   = "us-east-2"                // your AWS region
         ACCOUNT_ID   = "325910234813"              // your AWS account ID
         ECR_REGISTRY = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         ECR_REPO     = "${ECR_REGISTRY}/java-app"
