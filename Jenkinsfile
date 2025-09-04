@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'dev', url: 'https://github.com/LucidKarthik/Java-app.git'
+                git branch: 'cloud', url: 'https://github.com/LucidKarthik/Java-app.git'
             }
         }
 
