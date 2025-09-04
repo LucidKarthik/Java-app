@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven-3.9'   // The name you gave in Jenkins tools config
+    }
+
     environment {
         IMAGE_NAME = "expleodockerkk/java-app"
         IMAGE_TAG  = "1.0.0"
@@ -51,7 +55,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()  // Jenkins built-in to clean workspace after build
+            cleanWs()
         }
     }
 }
